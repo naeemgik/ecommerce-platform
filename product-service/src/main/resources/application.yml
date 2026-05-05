@@ -1,0 +1,198 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+    max-connections: 10000
+    accept-count: 100
+
+spring:
+  application:
+    name: product-service
+
+  # ===== DATABASE CONFIGURATION =====
+  datasource:
+    url: jdbc:h2:mem:productdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    hikari:
+      pool-name: ProductServicePool
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
+
+  # ===== JPA CONFIGURATION =====
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 50
+          order_inserts: true
+          order_updates: true
+        query:
+          plan_cache_max_size: 2048
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # ===== REDIS CONFIGURATION =====
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 8
+          min-idle: 2
+          max-wait: 1000ms
+          time-between-eviction-runs: 60000ms
+
+  # ===== KAFKA CONFIGURATION =====
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+    consumer:
+      group-id: product-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.ecommerce.product.event"
+
+# ===== EUREKA CONFIGURATION =====
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka:eureka-secret@${EUREKA_HOST:localhost}:8761/eureka/
+    registry-fetch-interval-seconds: 10
+    instance-info-replication-interval-seconds: 10
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+    metadata-map:
+      version: 1.0.0
+
+# ===== RESILIENCE4J CONFIGURATION =====
+resilience4j:
+  circuitbreaker:
+    instances:
+      productService:
+        register-health-indicator: true
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 5s
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold: 2s
+        record-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.dao.DataAccessException
+        ignore-exceptions:
+          - com.ecommerce.product.exception.ProductNotFoundException
+
+  retry:
+    instances:
+      productService:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.io.IOException
+          - org.springframework.dao.TransientDataAccessException
+
+  bulkhead:
+    instances:
+      productService:
+        max-concurrent-calls: 50
+        max-wait-duration: 500ms
+
+  thread-pool-bulkhead:
+    instances:
+      productService:
+        max-thread-pool-size: 10
+        core-thread-pool-size: 5
+        queue-capacity: 100
+
+  ratelimiter:
+    instances:
+      productService:
+        limit-for-period: 100
+        limit-refresh-period: 1s
+        timeout-duration: 500ms
+
+  timelimiter:
+    instances:
+      productService:
+        timeout-duration: 3s
+        cancel-running-future: true
+
+# ===== ACTUATOR & MONITORING =====
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers,caches,env
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true
+
+# ===== ASYNC EXECUTOR CONFIGURATION =====
+app:
+  async:
+    core-pool-size: 10
+    max-pool-size: 50
+    queue-capacity: 1000
+    thread-name-prefix: product-async-
+
+# ===== LOGGING =====
+logging:
+  level:
+    com.ecommerce.product: DEBUG
+    org.springframework.cache: DEBUG
+    org.springframework.kafka: INFO
+    io.github.resilience4j: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
