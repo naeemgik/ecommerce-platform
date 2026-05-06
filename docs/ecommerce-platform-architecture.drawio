@@ -22,11 +22,14 @@
           <mxGeometry x="780" y="90" width="260" height="70" as="geometry"/>
         </mxCell>
 
-        <mxCell id="gateway-layer-label" value="API Gateway" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#111111;" vertex="1" parent="1">
+        <mxCell id="gateway-layer-label" value="Gateway / Discovery" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#111111;" vertex="1" parent="1">
           <mxGeometry x="60" y="220" width="180" height="30" as="geometry"/>
         </mxCell>
         <mxCell id="api-gateway" value="API Gateway&#xa;Rate limiting / Auth / Routing" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=14;fontColor=#111111;" vertex="1" parent="1">
           <mxGeometry x="260" y="205" width="780" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="service-discovery" value="Service Discovery / Registry&#xa;Eureka :8761&#xa;Service registration / lookup" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="205" width="330" height="85" as="geometry"/>
         </mxCell>
 
         <mxCell id="services-layer-label" value="Services Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#111111;" vertex="1" parent="1">
@@ -112,6 +115,34 @@
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
         <mxCell id="e-client-third-party-gateway" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="client-third-party" target="api-gateway">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-gateway-discovery" value="service lookup" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="api-gateway" target="service-discovery">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-cart-discovery" value="register" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="cart" target="service-discovery">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-order-discovery" value="register" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="order" target="service-discovery">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-product-discovery" value="register" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="product" target="service-discovery">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-inventory-discovery" value="register" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="inventory" target="service-discovery">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-payment-discovery" value="register" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="payment" target="service-discovery">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-fulfillment-discovery" value="register" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="fulfillment" target="service-discovery">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-delivery-discovery" value="register" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="delivery" target="service-discovery">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-notification-discovery" value="register" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="notification" target="service-discovery">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
 
