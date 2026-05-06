@@ -108,7 +108,7 @@ public class KafkaConfig {
         factory.setConsumerFactory(consumerFactory());
         factory.setConcurrency(3); // 3 consumer threads
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        //factory.setObservationEnabled(true);
+        factory.setObservationEnabled(true);
 
         // Retry with backoff before sending to DLT
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(

@@ -17,29 +17,57 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
-	@Query("SELECT p FROM Product p WHERE p.id = :id AND p.active = true")
-	Optional<Product> findActiveById(@Param("id") Long id);
+    /**
+     * Find active product by ID - primary lookup
+     */
+    @Query("SELECT p FROM Product p WHERE p.id = :id AND p.active = true")
+    Optional<Product> findActiveById(@Param("id") Long id);
 
-	Optional<Product> findBySkuAndActiveTrue(String sku);
+    /**
+     * Find product by SKU
+     */
+    Optional<Product> findBySkuAndActiveTrue(String sku);
 
-	Page<Product> findByCategoryAndActiveTrue(String category, Pageable pageable);
+    /**
+     * Find all active products by category with pagination
+     */
+    Page<Product> findByCategoryAndActiveTrue(String category, Pageable pageable);
 
-	@Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) AND p.active = true")
-	Page<Product> searchByName(@Param("name") String name, Pageable pageable);
+    /**
+     * Search products by name (case insensitive)
+     */
+    @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) AND p.active = true")
+    Page<Product> searchByName(@Param("name") String name, Pageable pageable);
 
-	@Query("SELECT p FROM Product p WHERE p.price BETWEEN :minPrice AND :maxPrice AND p.active = true")
-	List<Product> findByPriceRange(@Param("minPrice") BigDecimal minPrice, @Param("maxPrice") BigDecimal maxPrice);
+    /**
+     * Find products within price range
+     */
+    @Query("SELECT p FROM Product p WHERE p.price BETWEEN :minPrice AND :maxPrice AND p.active = true")
+    List<Product> findByPriceRange(@Param("minPrice") BigDecimal minPrice,
+                                   @Param("maxPrice") BigDecimal maxPrice);
 
-	@Query("SELECT p FROM Product p WHERE p.stockQuantity <= :threshold AND p.active = true")
-	List<Product> findLowStockProducts(@Param("threshold") int threshold);
+    /**
+     * Find low stock products (for inventory alerts)
+     */
+    @Query("SELECT p FROM Product p WHERE p.stockQuantity <= :threshold AND p.active = true")
+    List<Product> findLowStockProducts(@Param("threshold") int threshold);
 
-	@Modifying
-	@Query("UPDATE Product p SET p.stockQuantity = p.stockQuantity - :quantity WHERE p.id = :id AND p.stockQuantity >= :quantity")
-	int decrementStock(@Param("id") Long id, @Param("quantity") int quantity);
+    /**
+     * Update stock quantity
+     */
+    @Modifying
+    @Query("UPDATE Product p SET p.stockQuantity = p.stockQuantity - :quantity WHERE p.id = :id AND p.stockQuantity >= :quantity")
+    int decrementStock(@Param("id") Long id, @Param("quantity") int quantity);
 
-	@Query("SELECT DISTINCT p.category FROM Product p WHERE p.active = true ORDER BY p.category")
-	List<String> findAllActiveCategories();
+    /**
+     * Find all distinct categories
+     */
+    @Query("SELECT DISTINCT p.category FROM Product p WHERE p.active = true ORDER BY p.category")
+    List<String> findAllActiveCategories();
 
-	@Query("SELECT p.category, COUNT(p) FROM Product p WHERE p.active = true GROUP BY p.category")
-	List<Object[]> countByCategory();
+    /**
+     * Count products by category
+     */
+    @Query("SELECT p.category, COUNT(p) FROM Product p WHERE p.active = true GROUP BY p.category")
+    List<Object[]> countByCategory();
 }

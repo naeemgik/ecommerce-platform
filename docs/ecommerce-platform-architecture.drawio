@@ -1,0 +1,206 @@
+<mxfile host="app.diagrams.net" modified="2026-05-06T00:00:00.000Z" agent="diagrams.net" version="24.7.17">
+  <diagram id="ecommerce-architecture" name="Ecommerce Platform Architecture">
+    <mxGraphModel dx="1800" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1500" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="Ecommerce Platform Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="60" y="30" width="520" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="client-layer-label" value="Client Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="60" y="95" width="180" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="client-web" value="Web Client" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="260" y="90" width="220" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="client-mobile" value="Mobile App" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="520" y="90" width="220" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="client-third-party" value="Third-party Integrations" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="780" y="90" width="260" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="gateway-layer-label" value="API Gateway" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="60" y="220" width="180" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="api-gateway" value="API Gateway&#xa;Rate limiting / Auth / Routing" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=14;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="260" y="205" width="780" height="85" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="services-layer-label" value="Services Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="60" y="365" width="180" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="cart" value="Cart Service&#xa;:8086" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="170" y="350" width="190" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="order" value="Order Service&#xa;:8084" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="390" y="350" width="190" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="product" value="Product Service&#xa;:8081" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="610" y="350" width="190" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="inventory" value="Inventory Service&#xa;:8082" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="830" y="350" width="190" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="payment" value="Payment Service&#xa;:8083" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="350" width="190" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="fulfillment" value="Fulfillment Service&#xa;:8087" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="350" width="190" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="delivery" value="Delivery Service&#xa;:8088" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1490" y="350" width="190" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="notification" value="Notification Service&#xa;:8085" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1710" y="350" width="190" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="db-layer-label" value="Database Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="60" y="540" width="180" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-cart" value="Cart DB" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="205" y="520" width="120" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-order" value="Order DB" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="425" y="520" width="120" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-product" value="Product DB" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="645" y="520" width="120" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-inventory" value="Inventory DB" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="865" y="520" width="120" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-payment" value="Payment DB" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1085" y="520" width="120" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-fulfillment" value="Fulfillment DB" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1305" y="520" width="120" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-delivery" value="Delivery DB" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1525" y="520" width="120" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-notification" value="Notification DB" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1745" y="520" width="120" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="kafka-layer-label" value="Kafka Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="60" y="710" width="180" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="kafka" value="Kafka Event Bus&#xa;order.created / inventory.reserved / inventory.rejected / payment.processed / payment.failed / fulfillment.confirmed / delivery.scheduled / order.cancelled" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="260" y="690" width="1260" height="95" as="geometry"/>
+        </mxCell>
+        <mxCell id="common-events" value="common-events module&#xa;Shared event contracts and topic names" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1560" y="690" width="340" height="95" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="redis-layer-label" value="Redis Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="60" y="880" width="180" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="redis" value="Redis Cache&#xa;product:{id} / cart/session cache / TTL based hot reads" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#ffffff;strokeColor=#333333;fontSize=13;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="260" y="850" width="520" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="notes" value="Operational notes&#xa;- Services scale independently&#xa;- Databases remain service-owned&#xa;- Kafka decouples long-running workflow steps&#xa;- Redis absorbs high-volume reads" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontColor=#111111;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="820" y="850" width="700" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-client-web-gateway" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="client-web" target="api-gateway">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-client-mobile-gateway" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="client-mobile" target="api-gateway">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-client-third-party-gateway" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="client-third-party" target="api-gateway">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-gateway-cart" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="api-gateway" target="cart">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-gateway-order" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="api-gateway" target="order">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-gateway-product" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="api-gateway" target="product">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-cart-product" value="product lookup" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="cart" target="product">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-order-product" value="product check" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="order" target="product">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-cart-db" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="cart" target="db-cart">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-order-db" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="order" target="db-order">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-product-db" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="product" target="db-product">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-inventory-db" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="inventory" target="db-inventory">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-payment-db" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="payment" target="db-payment">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-fulfillment-db" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="fulfillment" target="db-fulfillment">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-delivery-db" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="delivery" target="db-delivery">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-notification-db" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;" edge="1" parent="1" source="notification" target="db-notification">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-order-kafka" value="publish order.created" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="order" target="kafka">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-kafka-inventory" value="consume" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="kafka" target="inventory">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-inventory-kafka" value="publish inventory events" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="inventory" target="kafka">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-kafka-payment" value="consume" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="kafka" target="payment">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-payment-kafka" value="publish payment events" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="payment" target="kafka">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-kafka-fulfillment" value="consume" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="kafka" target="fulfillment">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-fulfillment-kafka" value="publish fulfillment events" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="fulfillment" target="kafka">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-kafka-delivery" value="consume" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="kafka" target="delivery">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-delivery-kafka" value="publish delivery events" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="delivery" target="kafka">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-kafka-order" value="status projection" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="kafka" target="order">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-kafka-notification" value="business event subscribers" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="kafka" target="notification">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-common-events-kafka" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;" edge="1" parent="1" source="common-events" target="kafka">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-product-redis" value="cache reads" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="product" target="redis">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-cart-redis" value="cart/session cache" style="endArrow=block;html=1;strokeWidth=1;dashed=1;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="cart" target="redis">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

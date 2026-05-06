@@ -1,295 +1,142 @@
-# E-Commerce Platform — Microservices Architecture
+# Enterprise Ecommerce Platform
 
-> **Solution Architect Assignment**: High-Performance Product Service with Redis Caching, Kafka Events, Resilience4j, and Spring Data JPA
+Standalone Spring Boot ecommerce platform showing a service-owned database model, Redis read-through caching, and Kafka-based saga choreography for order processing.
 
----
+## Architecture
 
-## 🏗️ Architecture Overview
+Requests enter through clients or the optional API gateway, then flow into small bounded-context services. Each business service owns its H2 datastore. Kafka carries the checkout workflow between services, while Redis is used for high-volume product cache reads.
 
-```
-                          ┌─────────────────────────────────┐
-                          │         Client (Browser/App)     │
-                          └──────────────┬──────────────────┘
-                                         │ HTTP
-                          ┌──────────────▼──────────────────┐
-                          │         API Gateway              │
-                          │   (Spring Cloud Gateway :8080)   │
-                          │   • Rate Limiting (Redis)        │
-                          │   • Circuit Breaker              │
-                          │   • Load Balancing               │
-                          └──────────────┬──────────────────┘
-                                         │ lb://product-service
-                          ┌──────────────▼──────────────────┐
-                          │       Product Service            │
-                          │          (:8081)                 │
-                          │                                  │
-                          │  ┌──────────────────────────┐   │
-                          │  │   REST Controller         │   │
-                          │  │   GET /products/{id}      │   │
-                          │  └────────────┬─────────────┘   │
-                          │               │ CompletableFuture│
-                          │  ┌────────────▼─────────────┐   │
-                          │  │    ProductService         │   │
-                          │  │  @CircuitBreaker          │   │
-                          │  │  @Retry @Bulkhead         │   │
-                          │  └──┬──────────┬────────────┘   │
-                          │     │          │                 │
-                          │  ┌──▼──┐   ┌──▼──────────────┐  │
-                          │  │Redis│   │  PostgreSQL/H2   │  │
-                          │  │Cache│   │  (JPA Repository)│  │
-                          │  │(10m)│   └─────────────────┘  │
-                          │  └─────┘                         │
-                          │                │                 │
-                          │  ┌─────────────▼──────────────┐ │
-                          │  │   Kafka Event Publisher     │ │
-                          │  └─────────────────────────────┘ │
-                          └────────────────┬────────────────┘
-                                           │
-                          ┌────────────────▼────────────────┐
-                          │          Apache Kafka            │
-                          │  Topics: product.created         │
-                          │          product.updated         │
-                          │          product.deleted         │
-                          │          product.viewed          │
-                          │          product.cache.          │
-                          │          invalidation            │
-                          └────────────────────────────────┘
-```
+See the layered diagram in `docs/ecommerce-platform-architecture.drawio`.
 
-## 📂 Project Structure
+## Services
 
-```
-ecommerce-platform/
-├── pom.xml                          # Multi-module root POM
-├── docker-compose.yml               # Full stack local setup
-│
-├── discovery-server/                # Eureka Service Registry (:8761)
-│   ├── pom.xml
-│   └── src/main/
-│       ├── java/com/ecommerce/discovery/
-│       │   ├── DiscoveryServerApplication.java
-│       │   └── SecurityConfig.java
-│       └── resources/application.yml
-│
-├── api-gateway/                     # Spring Cloud Gateway (:8080)
-│   ├── pom.xml
-│   └── src/main/
-│       ├── java/com/ecommerce/gateway/
-│       │   ├── ApiGatewayApplication.java
-│       │   └── FallbackController.java
-│       └── resources/application.yml
-│
-└── product-service/                 # Core Product Microservice (:8081)
-    ├── pom.xml
-    └── src/
-        ├── main/java/com/ecommerce/product/
-        │   ├── ProductServiceApplication.java  # @EnableCaching @EnableAsync
-        │   ├── config/
-        │   │   ├── RedisConfig.java            # Cache config, TTLs, serialization
-        │   │   ├── AsyncConfig.java            # ThreadPoolTaskExecutor
-        │   │   └── KafkaConfig.java            # Producer/Consumer factories, Topics
-        │   ├── controller/
-        │   │   └── ProductController.java      # REST endpoints + async handling
-        │   ├── service/
-        │   │   └── ProductService.java         # Cache-Aside + Resilience4j
-        │   ├── entity/
-        │   │   └── Product.java                # JPA entity with @Embedded dimensions
-        │   ├── repository/
-        │   │   └── ProductRepository.java      # Custom JPA queries
-        │   ├── dto/
-        │   │   ├── ProductRequest.java         # Validation annotations
-        │   │   ├── ProductResponse.java        # Serializable for Redis
-        │   │   ├── ProductMapper.java          # MapStruct mapper
-        │   │   └── ApiResponse.java            # Wrapper
-        │   ├── event/
-        │   │   ├── ProductEvent.java           # Event model
-        │   │   ├── ProductEventPublisher.java  # Kafka producer
-        │   │   └── ProductEventConsumer.java   # Kafka consumer (cache invalidation)
-        │   └── exception/
-        │       ├── ProductNotFoundException.java
-        │       └── GlobalExceptionHandler.java
-        └── resources/
-            ├── application.yml                 # Full config (Redis, Kafka, R4J, JPA)
-            ├── application-prod.yml            # Production overrides (PostgreSQL)
-            └── data.sql                        # Seed data (10 sample products)
-```
+### Service Catalogue
 
-## 🔑 Key Design Decisions
+- `api-gateway`: Spring Cloud Gateway entry point for external traffic. It handles route forwarding, request rate limiting, circuit breaker fallback, and service lookup through Eureka.
+- `discovery-server`: Eureka registry used by gateway and services for service discovery. It runs with basic authentication so services can register and resolve each other consistently.
+- `product-service`: Owns product catalog reads backed by H2. It uses Redis read-through caching and async responses to reduce repeated database hits for hot products.
+- `cart-service`: Owns customer cart operations such as add item, read cart, and clear cart. It calls `product-service` to enrich cart items with product details.
+- `order-service`: Owns order creation, product validation, and order status projection. It starts the saga by publishing `order.created` and updates orders from downstream Kafka events.
+- `inventory-service`: Reserves stock when new orders arrive. It publishes success or rejection events so the saga can continue or cancel cleanly.
+- `payment-service`: Authorizes payment after inventory has been reserved. It records payment attempts and publishes processed or failed payment events.
+- `fulfillment-service`: Confirms warehouse fulfillment after successful payment. It records fulfillment state and publishes confirmation for delivery scheduling.
+- `delivery-service`: Schedules delivery after fulfillment confirmation. It stores delivery records and publishes `delivery.scheduled`.
+- `notification-service`: Records customer-facing business events from the saga. It is the place to plug in email, SMS, or push notification fan-out.
+- `common-events`: Shared Maven module for Kafka topic names, event payloads, and status enums. It keeps service contracts consistent across the platform.
 
-### 1. Cache-Aside Pattern (Read-Aside)
-```
-Request → Check Redis (cache key: "product:{id}")
-         ├── HIT  → Return cached, mark cacheStatus="HIT"
-         └── MISS → Fetch DB → Store Redis (TTL=10min) → Return
-```
-- **Why Cache-Aside over Spring @Cacheable?** More control: manual TTL, cache status tagging, graceful Redis failure handling
-- **Graceful degradation**: If Redis is down, service continues serving from DB (warn, don't fail)
+### Ports And Integrations
 
-### 2. Asynchronous Processing with CompletableFuture
-```java
-// ThreadPoolTaskExecutor: 10 core / 50 max / 1000 queue
-@Async("productTaskExecutor")
-public CompletableFuture<ProductResponse> getProductByIdAsync(Long id) { ... }
-```
-- Non-blocking request handling under high concurrent load
-- Returns `CompletableFuture` from controller — Servlet container thread is released immediately
-- `CallerRunsPolicy` prevents task rejection; applies backpressure instead
+| Service | Port | Main responsibility | Storage / integration |
+| --- | ---: | --- | --- |
+| `api-gateway` | 8080 | Gateway routing, rate limiting, circuit breaker fallback | Redis rate limiter, Eureka discovery |
+| `discovery-server` | 8761 | Eureka service registry | Basic auth: `eureka` / `eureka-secret` |
+| `product-service` | 8081 | Product catalog API and async product lookup | H2 `productdb`, Redis key `product:{id}` |
+| `inventory-service` | 8082 | Stock reservation after order creation | H2 `inventorydb`, Kafka consumer/producer |
+| `payment-service` | 8083 | Payment authorization after inventory reservation | H2 `paymentdb`, Kafka consumer/producer |
+| `order-service` | 8084 | Order API, product validation, saga state projection | H2 `orderdb`, Kafka consumer/producer |
+| `notification-service` | 8085 | Notification log for customer-facing events | H2 `notificationdb`, Kafka consumer |
+| `cart-service` | 8086 | Customer cart CRUD with product enrichment | H2 `cartdb`, calls `product-service` |
+| `fulfillment-service` | 8087 | Warehouse fulfillment confirmation | H2 `fulfillmentdb`, Kafka consumer/producer |
+| `delivery-service` | 8088 | Delivery scheduling after fulfillment | H2 `deliverydb`, Kafka consumer/producer |
+| `common-events` | - | Shared topic names, events, and status enums | Maven library module |
 
-### 3. Resilience4j Layered Protection
-```
-Request → [RateLimiter: 100 req/s] → [CircuitBreaker: 50% fail threshold]
-       → [Bulkhead: 50 concurrent calls] → [Retry: 3 attempts, exponential]
-       → DB Call → [TimeLimiter: 3s timeout]
-```
+## Order Saga
 
-### 4. Distributed Cache Invalidation via Kafka
-When a product is updated on any service instance:
-```
-Instance A: updates product → publishes "product.cache.invalidation" topic
-Instance B: consumes event → evicts cache key locally
-```
-This prevents stale cache in horizontally scaled deployments.
+1. `order-service` validates products through `product-service` using `WebClient`, `CompletableFuture`, and `resilience4j`.
+2. `order-service` stores the order and publishes `order.created`.
+3. `inventory-service` reserves stock and publishes `inventory.reserved` or `inventory.rejected`.
+4. `payment-service` consumes reserved inventory and publishes `payment.processed` or `payment.failed`.
+5. `fulfillment-service` consumes successful payments and publishes `fulfillment.confirmed`.
+6. `delivery-service` consumes fulfillment confirmation and publishes `delivery.scheduled`.
+7. `order-service` listens to downstream events to update the aggregate status.
+8. `notification-service` records key business events for email, SMS, or push fan-out.
 
-### 5. Event-Driven Architecture
-Every mutation publishes a Kafka event:
-- `product.created` → downstream services (search index, recommendations)
-- `product.updated` → cache invalidation, re-indexing
-- `product.deleted` → cleanup downstream
-- `product.viewed` → analytics, trending
+Failure paths publish `order.cancelled` so downstream services can release resources or trigger support workflows.
 
----
+## Key Endpoints
 
-## 🚀 Running the Application
+| Endpoint | Service | Purpose |
+| --- | --- | --- |
+| `GET /api/products/{productId}` | `product-service` | Fetch product details through async Redis read-through cache |
+| `GET /api/carts/{customerId}/items` | `cart-service` | Read customer cart |
+| `POST /api/carts/{customerId}/items` | `cart-service` | Add product to cart |
+| `DELETE /api/carts/{customerId}/items` | `cart-service` | Clear cart |
+| `POST /api/orders` | `order-service` | Create order and start saga |
+| `GET /api/orders/{orderId}` | `order-service` | Read order and current saga status |
+| `GET /api/inventory` | `inventory-service` | Inspect seeded inventory |
+| `GET /api/payments` | `payment-service` | Inspect payment records |
+| `GET /api/fulfillments` | `fulfillment-service` | Inspect fulfillment records |
+| `GET /api/deliveries` | `delivery-service` | Inspect delivery records |
+| `GET /api/notifications` | `notification-service` | Inspect notification logs |
 
-### Option 1: Full Docker Stack (Recommended)
+## Product Caching
+
+`product-service` uses a Redis read-through pattern:
+
+1. Read `product:{id}` from Redis.
+2. On miss, query H2 through Spring Data JPA.
+3. Cache the product for 10 minutes.
+4. Return the result asynchronously with `CompletableFuture`.
+
+## Resilience And Scale
+
+- Services can scale independently because each service owns its datastore and Kafka consumer group.
+- Kafka buffers checkout spikes and decouples slow workflow steps.
+- Redis reduces repeated product database reads.
+- `resilience4j` circuit breaker, retry, and time limiter protect synchronous product validation.
+- `common-events` keeps topic names, event payloads, and status enums consistent.
+
+## Run Locally
+
+Start Kafka and Redis:
+
 ```bash
-# Start all services (Kafka, Redis, PostgreSQL, all microservices, monitoring)
-docker-compose up -d
-
-# Check health
-docker-compose ps
-
-# View logs
-docker-compose logs -f product-service
+docker compose up -d
 ```
 
-### Option 2: Local Development (H2 + local Redis/Kafka)
+Compile the parent Maven modules:
+
 ```bash
-# Prerequisites: Redis on :6379, Kafka on :9092
-
-# Start Discovery Server first
-cd discovery-server
-../mvnw spring-boot:run
-
-# Start API Gateway
-cd ../api-gateway
-../mvnw spring-boot:run
-
-# Start Product Service
-cd ../product-service
-../mvnw spring-boot:run
+mvn -q -DskipTests compile
 ```
 
-### Option 3: Product Service Standalone (no Eureka/Kafka needed)
+Run services in separate terminals:
+
 ```bash
-cd product-service
-../mvnw spring-boot:run -Dspring.cloud.discovery.enabled=false \
-  -Dspring.kafka.producer.bootstrap-servers=localhost:9092
+cd discovery-server && mvn spring-boot:run
+cd api-gateway && mvn spring-boot:run
+cd product-service && mvn spring-boot:run
+cd inventory-service && mvn spring-boot:run
+cd payment-service && mvn spring-boot:run
+cd fulfillment-service && mvn spring-boot:run
+cd delivery-service && mvn spring-boot:run
+cd notification-service && mvn spring-boot:run
+cd cart-service && mvn spring-boot:run
+cd order-service && mvn spring-boot:run
 ```
 
----
+Create an order:
 
-## 🌐 API Reference
-
-### Base URL: `http://localhost:8080/api/v1/products`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/products/{id}` | Get product by ID (async, cached) |
-| GET | `/products?category=Electronics&page=0&size=20` | List by category (paginated, cached) |
-| GET | `/products/search?name=laptop` | Search products (async) |
-| GET | `/products/categories` | All categories (1-hour cache) |
-| POST | `/products` | Create product |
-| PUT | `/products/{id}` | Update product + cache refresh |
-| DELETE | `/products/{id}` | Soft delete + cache eviction |
-
-### Example Request & Response
-
-**GET** `/api/v1/products/1`
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "sku": "LAPTOP-001",
-    "name": "ProBook 15 Laptop",
-    "description": "High-performance laptop...",
-    "price": 1299.99,
-    "stockQuantity": 50,
-    "category": "Electronics",
-    "brand": "TechPro",
-    "inStock": true,
-    "cacheStatus": "HIT",
-    "createdAt": "2024-01-15T10:30:00",
-    "updatedAt": "2024-01-15T10:30:00"
-  },
-  "timestamp": "2024-01-15T11:00:00"
-}
-```
-
----
-
-## 📊 Monitoring & Observability
-
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| Eureka Dashboard | http://localhost:8761 | eureka / eureka-secret |
-| API Gateway | http://localhost:8080 | - |
-| Product Service | http://localhost:8081 | - |
-| H2 Console | http://localhost:8081/h2-console | sa / (empty) |
-| Kafka UI | http://localhost:8090 | - |
-| Redis Commander | http://localhost:8091 | - |
-| Prometheus | http://localhost:9090 | - |
-| Grafana | http://localhost:3000 | admin / admin |
-
-### Key Metrics
-- `product.fetch.time` — time to retrieve a product
-- `product.cache.hits` / `product.cache.misses` — cache effectiveness
-- `product.cache.errors` — Redis failure rate
-- `resilience4j.circuitbreaker.*` — circuit breaker state
-- `http.server.requests` — request rates and latencies
-
----
-
-## 🧪 Testing
 ```bash
-# Unit tests only
-mvn test -pl product-service
-
-# Integration tests
-mvn verify -pl product-service -Pintegration-test
-
-# Build all (skip tests)
-mvn clean package -DskipTests
+curl -X POST http://localhost:8084/api/orders \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "customerId": 42,
+    "items": [
+      { "productId": 1, "quantity": 1 },
+      { "productId": 2, "quantity": 2 }
+    ]
+  }'
 ```
 
----
+Check the order status:
 
-## ⚙️ Technology Stack
+```bash
+curl http://localhost:8084/api/orders/1
+```
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| Framework | Spring Boot 3.2 | Core framework |
-| Service Discovery | Spring Cloud Netflix Eureka | Dynamic service registration |
-| API Gateway | Spring Cloud Gateway | Routing, rate limiting, CB |
-| Caching | Spring Data Redis + Lettuce | Distributed cache (Read-Aside, 10-min TTL) |
-| Database ORM | Spring Data JPA + Hibernate | Entity persistence |
-| Database (Dev) | H2 (in-memory) | Fast local development |
-| Database (Prod) | PostgreSQL 15 | Production persistence |
-| Messaging | Apache Kafka | Async events + cache invalidation |
-| Resilience | Resilience4j | CircuitBreaker, Retry, Bulkhead, RateLimiter |
-| Async | Java CompletableFuture | Non-blocking request processing |
-| DTO Mapping | MapStruct | Compile-time entity↔DTO mapping |
-| Monitoring | Micrometer + Prometheus + Grafana | Observability |
-| Containerization | Docker + Docker Compose | Local orchestration |
+Stop infrastructure:
+
+```bash
+docker compose down
+```
